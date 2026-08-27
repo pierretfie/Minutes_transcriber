@@ -35,6 +35,7 @@ Before using the UI, you need to set up the n8n workflow:
 ### 2. Configure Webhook URL
 
 Once n8n is running and the workflow is active:
+<img width="500" height="579" alt="image" src="https://github.com/user-attachments/assets/020c6e7a-1f71-459e-a7ab-2341cf9ce921" />
 
 1. Open the Minutes Transcriber UI
 2. Click the **Settings** button in the top right
