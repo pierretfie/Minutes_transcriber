@@ -4,6 +4,8 @@ A tool for turning recorded meeting audio into polished, ready-to-share minutes 
 
 It handles the full pipeline: **compress → transcribe → write minutes**, using an [n8n](https://n8n.io/) workflow powered by AI models. What used to take hours of listening and typing now takes minutes, leaving only light proofreading (mainly fixing names) as the human step.
 
+> **The success of this requires a well recorded session and good transcriber models of choice.**
+
 ## Table of Contents
 - [Setup](#setup)
   - [1. n8n Setup](#1-n8n-setup)
