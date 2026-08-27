@@ -1,0 +1,525 @@
+{
+  "name": "Minutes Transcriber",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ddb50b06-50cb-4862-ac8f-d134338d5509",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        1200
+      ],
+      "id": "37794a96-afec-41a2-a828-24d8ded545ae",
+      "name": "Webhook",
+      "webhookId": "ddb50b06-50cb-4862-ac8f-d134338d5509"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "inputType": "binary",
+        "binaryPropertyName": "file"
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        1488
+      ],
+      "id": "1ac10622-c3ed-4353-8f0f-ae5fb9ab6e29",
+      "name": "Upload a media file",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0JzA75WWD39sbZZy",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.7-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.7-flash",
+          "cachedResultUrl": ""
+        },
+        "text": "You are a meeting transcription formatting model. Your job is to take a raw meeting Audios \u2014 which may include code-switching between English and Kiswahili (or Sheng), timestamps, and speaker labels \u2014 and rewrite it into a clean, speaker-attributed narrative report in English, not a script, dialogue, or timestamped format.\n\nOUTPUT FORMAT (strict)\n- Never output the transcript as labeled dialogue (e.g. \"Festus: ...\" or \"User 1: ...\"). Every turn must be rewritten as flowing reported-speech narrative prose (e.g. \"Festus said that...\", \"User 2 asked whether...\").\n- Do not preserve the raw turn-by-turn structure or line breaks from the source. Merge and reorganize into paragraphs per the rules below.\n- Do not add headers, titles, or section breaks.\n\nSPEAKER IDENTIFICATION (exhaustive name search required before any fallback)\n- If the raw transcript already contains an explicit speaker label attached to a turn (e.g. \"Festus:\", \"John:\"), treat that label as confirmed identification. Use that real name directly and consistently for all of that speaker's turns \u2014 no further inference needed for that speaker.\n- If a speaker's turns are NOT explicitly labeled in the source, you must actively work to identify them by name before defaulting to \"User N.\" Search the entire transcript (not just that speaker's own turns) for:\n  - Self-introduction (\"this is X,\" \"X here\").\n  - Another speaker addressing them by name immediately before or after they talk.\n  - Third-person references elsewhere in the transcript that let you connect a name to this voice/turn.\n  - Sign-offs or recaps that attribute earlier points to a name.\n  - Indirect correlation via role, topic, or reply pattern.\n- Do this identification pass across the WHOLE transcript before finalizing labels \u2014 a name revealed later can and should be used to relabel that speaker's earlier turns.\n- Only use \"User 1\", \"User 2\", \"User 3\", etc. (in order of first speaking) after this full search across explicit labels and contextual evidence turns up nothing. This is a documented last resort per speaker, not a default.\n- Do not guess or invent a name unsupported by the transcript. If genuinely no basis exists, use \"User N.\"\n- Expect most transcripts \u2014 especially ones with any explicit labels or addressing cues \u2014 to yield real names for most or all speakers. A report where every speaker is \"User N\" should prompt you to double-check you didn't miss a label or cue.\n- It is acceptable to have a mix in the same report \u2014 some speakers identified by name, others labeled \"User N\" \u2014 if that's what the evidence supports.\n\nNAMED INDIVIDUALS MENTIONED IN CONTENT\n- Any real names mentioned within the substance of what a speaker says \u2014 e.g. a developer, contact, colleague, or client referenced by name \u2014 must be preserved exactly as stated. Do not omit, generalize, or replace these names with role descriptions.\n- Do not confuse a named individual mentioned in content with a speaker unless that person is separately confirmed (via explicit label or the contextual search above) to also be an active speaker later in the transcript. If they do become a speaker, attribute their turns to their real name going forward, while other speakers' reported speech about them continues to use their name.\n\nNARRATIVE STYLE\n- Rewrite each speaker's contribution as reported speech, varying reporting verbs naturally (said, asked, explained, raised a concern that, noted, etc.).\n- If any portion of a speaker's turn is in Kiswahili or Sheng, translate it accurately into English as part of the same flowing narrative \u2014 no untranslated fragments, no separate translation section. Preserve idiomatic meaning, tone, and intent (softening, urgency, frustration, humor) rather than translating word-for-word. If a term has no clean English equivalent, translate as closely as possible while keeping the intended meaning.\n- Preserve full meaning and all substantive content regardless of source language. Do not omit information, but smooth filler words, false starts, and repetition into clean prose since this is a narrative report, not a verbatim transcript.\n- Keep content in the same chronological order as the original transcript.\n- Group each speaker's full turn into one flowing paragraph rather than fragmented sentences, unless the topic clearly shifts within that turn.\n- Do not add outside commentary, opinions, or information not present in the transcript.\n- Do not leave any information behind, in either language.\n- Always Summarize the reading of the previous minutes part ONLY but the rest of the information should be retain by a factor of 90%.\n- Always Take note of said times eg \"at 7:40 am\" or \"9:00 pm\" but don't guess or assume.",
+        "audioUrls": "={{ $json.fileUri }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        1488
+      ],
+      "id": "a16da940-2518-490b-8815-010feb43f6c5",
+      "name": "Analyze audio",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0JzA75WWD39sbZZy",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d132e1-b02d-4088-8deb-79df7d51894c",
+              "name": "Sample 1",
+              "value": "[Add your md sample 1 minutes here]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        528
+      ],
+      "id": "bee1c265-f18f-449b-a2a1-9c83756aa78e",
+      "name": "sample 1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d132e1-b02d-4088-8deb-79df7d51894c",
+              "name": "Sample 2",
+              "value": "[Add your md sample 2 minutes here]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        720
+      ],
+      "id": "03e3065a-cb8f-44d0-8c3e-0e1da135dd49",
+      "name": "sample  2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d132e1-b02d-4088-8deb-79df7d51894c",
+              "name": "Sample 3",
+              "value": "[Add your md sample 3 minutes here]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        912
+      ],
+      "id": "56b0b58a-73d1-4d8f-92aa-8ce9bc9b44ea",
+      "name": "sample  3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d132e1-b02d-4088-8deb-79df7d51894c",
+              "name": "Sample 4",
+              "value": "[Add your md sample 4 minutes here]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        1104
+      ],
+      "id": "1237bdfb-6a9e-4593-bc1d-e2614f4ae3d9",
+      "name": "sample  4"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        416,
+        864
+      ],
+      "id": "8cff947c-49b4-48b2-a69a-cd0f978f0414",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77d132e1-b02d-4088-8deb-79df7d51894c",
+              "name": "Instructions",
+              "value": "Above are samples for how i write minutes using the today's meeting transcription below write the minutes on it. The samples can also help get the correct product's and people's names spellings. **Do not leave out any content from the transcription.**\nAlso without losing content scale and summarize detailed areas the minutes to a word count of about 1700-1800 words.",
+              "type": "string"
+            },
+            {
+              "id": "ae03224e-4cdc-41af-bac7-cbc862f84a67",
+              "name": "Today's transcription",
+              "value": "={{ $json[\"today's minutes metadata\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        1296
+      ],
+      "id": "ca857816-270e-43a4-81b7-edf745ceb925",
+      "name": "current transcription"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['Sample 1'] }}{{ $json['Sample 2'] }} {{ $json['Sample 3'] }}{{ $json['Sample 4'] }}{{ $json.Instructions }}{{ $json['Today\\'s transcription'] }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        912
+      ],
+      "id": "edea1a6b-357a-40cc-8405-fbac8f01323d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        1152
+      ],
+      "id": "b630ba87-22a7-4b26-9c18-6e8ee2102509",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Ijf1BSTxKJvkcy9o",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bf0c92de-a3e5-4774-aed5-61302f06b448",
+              "leftValue": "={{ $json.body.transcribe }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        1200
+      ],
+      "id": "1836122a-aae7-4a96-8e41-e92e6df619d7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7669839b-2f2c-43b3-bb46-218223220b41",
+              "name": "today's minutes metadata",
+              "value": "={{ $json.body.transcript }}, {{ $json.body.metadata }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -32,
+        912
+      ],
+      "id": "25dc2b0b-2edd-4d2d-b1c9-31029c7ba680",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash",
+          "cachedResultUrl": ""
+        },
+        "text": "You are a meeting transcription formatting model. Your job is to take a raw meeting Audios \u2014 which may include code-switching between English and Kiswahili (or Sheng), timestamps, and speaker labels \u2014 and rewrite it into a clean, speaker-attributed narrative report in English, not a script, dialogue, or timestamped format.\n\nOUTPUT FORMAT (strict)\n- Never output the transcript as labeled dialogue (e.g. \"Festus: ...\" or \"User 1: ...\"). Every turn must be rewritten as flowing reported-speech narrative prose (e.g. \"Festus said that...\", \"User 2 asked whether...\").\n- Do not preserve the raw turn-by-turn structure or line breaks from the source. Merge and reorganize into paragraphs per the rules below.\n- Do not add headers, titles, or section breaks.\n\nSPEAKER IDENTIFICATION (exhaustive name search required before any fallback)\n- If the raw transcript already contains an explicit speaker label attached to a turn (e.g. \"Festus:\", \"John:\"), treat that label as confirmed identification. Use that real name directly and consistently for all of that speaker's turns \u2014 no further inference needed for that speaker.\n- If a speaker's turns are NOT explicitly labeled in the source, you must actively work to identify them by name before defaulting to \"User N.\" Search the entire transcript (not just that speaker's own turns) for:\n  - Self-introduction (\"this is X,\" \"X here\").\n  - Another speaker addressing them by name immediately before or after they talk.\n  - Third-person references elsewhere in the transcript that let you connect a name to this voice/turn.\n  - Sign-offs or recaps that attribute earlier points to a name.\n  - Indirect correlation via role, topic, or reply pattern.\n- Do this identification pass across the WHOLE transcript before finalizing labels \u2014 a name revealed later can and should be used to relabel that speaker's earlier turns.\n- Only use \"User 1\", \"User 2\", \"User 3\", etc. (in order of first speaking) after this full search across explicit labels and contextual evidence turns up nothing. This is a documented last resort per speaker, not a default.\n- Do not guess or invent a name unsupported by the transcript. If genuinely no basis exists, use \"User N.\"\n- Expect most transcripts \u2014 especially ones with any explicit labels or addressing cues \u2014 to yield real names for most or all speakers. A report where every speaker is \"User N\" should prompt you to double-check you didn't miss a label or cue.\n- It is acceptable to have a mix in the same report \u2014 some speakers identified by name, others labeled \"User N\" \u2014 if that's what the evidence supports.\n\nNAMED INDIVIDUALS MENTIONED IN CONTENT\n- Any real names mentioned within the substance of what a speaker says \u2014 e.g. a developer, contact, colleague, or client referenced by name \u2014 must be preserved exactly as stated. Do not omit, generalize, or replace these names with role descriptions.\n- Do not confuse a named individual mentioned in content with a speaker unless that person is separately confirmed (via explicit label or the contextual search above) to also be an active speaker later in the transcript. If they do become a speaker, attribute their turns to their real name going forward, while other speakers' reported speech about them continues to use their name.\n\nNARRATIVE STYLE\n- Rewrite each speaker's contribution as reported speech, varying reporting verbs naturally (said, asked, explained, raised a concern that, noted, etc.).\n- If any portion of a speaker's turn is in Kiswahili or Sheng, translate it accurately into English as part of the same flowing narrative \u2014 no untranslated fragments, no separate translation section. Preserve idiomatic meaning, tone, and intent (softening, urgency, frustration, humor) rather than translating word-for-word. If a term has no clean English equivalent, translate as closely as possible while keeping the intended meaning.\n- Preserve full meaning and all substantive content regardless of source language. Do not omit information, but smooth filler words, false starts, and repetition into clean prose since this is a narrative report, not a verbatim transcript.\n- Keep content in the same chronological order as the original transcript.\n- Group each speaker's full turn into one flowing paragraph rather than fragmented sentences, unless the topic clearly shifts within that turn.\n- Do not add outside commentary, opinions, or information not present in the transcript.\n- Do not leave any information behind, in either language.\n- Always Summarize the reading of the previous minutes part ONLY but the rest of the information should be retain by a factor of 90%.\n- Always Take note of said times eg \"at 7:40 am\" or \"9:00 pm\" but don't guess or assume.",
+        "audioUrls": "https://generativelanguage.googleapis.com/v1beta/files/i4l367uhi87w",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -480,
+        304
+      ],
+      "id": "47b5c4de-758c-4b4f-a3ad-1b3aed4b0d48",
+      "name": "Analyze audio1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0JzA75WWD39sbZZy",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        112
+      ],
+      "id": "1560bc8b-b541-4eae-8647-8c3bbeb8482d",
+      "name": "NVIDIA Nemotron Chat Model",
+      "credentials": {
+        "nvidiaApi": {
+          "id": "xfPG445xaeRrvcmp",
+          "name": "NVIDIA Nemotron account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a media file": {
+      "main": [
+        [
+          {
+            "node": "Analyze audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze audio": {
+      "main": [
+        []
+      ]
+    },
+    "sample  4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "sample  3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "sample  2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "sample 1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "current transcription": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Upload a media file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "sample 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sample  2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sample  3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sample  4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "current transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Nemotron Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b2755466-bbda-496c-8ebe-bdcf2c338b7c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "942aac32c8ebada764a7ec3feb8b7a68c932eae823704eae132bba849a253743"
+  },
+  "nodeGroups": [],
+  "id": "lhgEEhZh18z65jF7",
+  "tags": []
+}
