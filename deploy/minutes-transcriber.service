@@ -1,0 +1,16 @@
+[Unit]
+Description=Minutes Transcriber
+After=network.target
+
+[Service]
+Type=simple
+User=kali
+Environment=NODE_ENV=production
+Environment=PATH=/home/kali/.config/nvm/versions/node/v22.23.1/bin:/usr/local/bin:/usr/bin:/bin
+WorkingDirectory=/home/kali/bundle
+ExecStart=/home/kali/bundle/start.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

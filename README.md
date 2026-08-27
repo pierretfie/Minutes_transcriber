@@ -76,3 +76,56 @@ The result is a clean, finished set of minutes generated directly from the meeti
 The diagram below shows the complete n8n pipeline, from audio upload to finished minutes. An hours-long manual process is reduced to minutes — the only remaining human work is proofreading and correcting the occasional name or identity error.
 
 <img width="1398" height="733" alt="Full n8n workflow diagram" src="https://github.com/user-attachments/assets/14540b44-9860-408d-b89c-cb9d19ccc315" />
+
+---
+
+## Deployment
+
+### Build & Bundle
+
+```bash
+npm run bundle
+```
+
+This creates a `bundle/` folder (9.1MB) with everything needed to run the app.
+
+### Run Locally
+
+```bash
+cd bundle
+./start.sh        # Linux/Mac
+start.bat         # Windows
+```
+
+### Network Access
+
+Open your browser and go to:
+- Local: http://localhost:3000
+- Network: http://YOUR_IP:3000
+
+Find your IP:
+```bash
+ifconfig | grep "inet " | grep -v 127.0.0.1
+```
+
+### Configuration
+
+Edit `server/config/settings.json` to configure:
+- Webhook URL
+- Request timeout
+
+### Systemd Service (Linux)
+
+To run as a service:
+
+```bash
+sudo cp deploy/minutes-transcriber.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable minutes-transcriber
+sudo systemctl start minutes-transcriber
+```
+
+### Requirements
+
+- Node.js v18+ installed on the target machine
+- Port 3000 open for network access
