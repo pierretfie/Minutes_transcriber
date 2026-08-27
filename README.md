@@ -5,14 +5,45 @@ A tool for turning recorded meeting audio into polished, ready-to-share minutes 
 It handles the full pipeline: **compress → transcribe → write minutes**, using an [n8n](https://n8n.io/) workflow powered by AI models. What used to take hours of listening and typing now takes minutes, leaving only light proofreading (mainly fixing names) as the human step.
 
 ## Table of Contents
+- [Setup](#setup)
+  - [1. n8n Setup](#1-n8n-setup)
+  - [2. Configure Webhook URL](#2-configure-webhook-url)
 - [How It Works](#how-it-works)
-- [1. Upload & Compress Your Audio](#1-upload--compress-your-audio)
-- [2. Transcription](#2-transcription)
-- [3. Minutes Generation](#3-minutes-generation)
+  - [3. Upload & Compress Your Audio](#3-upload--compress-your-audio)
+  - [4. Transcription](#4-transcription)
+  - [5. Minutes Generation](#5-minutes-generation)
 - [Full Workflow Overview](#full-workflow-overview)
+- [Deployment](#deployment)
 
-  <img width="947" height="804" alt="image" src="https://github.com/user-attachments/assets/eb914285-ec93-4c8a-9048-0adce1c43a42" />
+---
 
+## Setup
+
+### 1. n8n Setup
+
+Before using the UI, you need to set up the n8n workflow:
+
+1. Install and run [n8n](https://n8n.io/)
+2. Import the workflow from `n8n workflow/Minutes Transcriber.json`
+3. Add your Google Gemini API credentials to the workflow nodes
+4. Add your sample minutes to the workflow (replace the placeholders in the "sample" nodes)
+5. Activate the workflow
+6. Copy the webhook URL from the Webhook node
+
+### 2. Configure Webhook URL
+
+Once n8n is running and the workflow is active:
+
+1. Open the Minutes Transcriber UI
+2. Click the **Settings** button in the top right
+3. Paste your n8n webhook URL
+4. Click **Save**
+
+> **Important:** You must configure the webhook URL before you can use the app. The UI will show a warning if no webhook is configured.
+
+<img width="947" height="804" alt="image" src="https://github.com/user-attachments/assets/eb914285-ec93-4c8a-9048-0adce1c43a42" />
+
+---
 
 ## How It Works
 
@@ -22,9 +53,7 @@ The process has three stages:
 2. **Transcribe** the compressed audio into text using an AI model via n8n.
 3. **Generate minutes** from the confirmed transcript, styled to match your own writing conventions.
 
----
-
-## 1. Upload & Compress Your Audio
+### 3. Upload & Compress Your Audio
 
 Upload your audio file and choose a compression setting. **32kHz is recommended**, as it has shown the most accurate transcription results.
 
@@ -36,24 +65,20 @@ ffmpeg -i input_file.m4a -ac 1 -ar 16000 -b:a 32k output_file.m4a
 
 <img width="917" height="349" alt="Upload and compression settings" src="https://github.com/user-attachments/assets/b3ff32f7-1807-47fb-8236-57c461b9ecc6" />
 
-### Downloadable Compressed File
+#### Downloadable Compressed File
 
 Once compressed, you can download the resulting file. This means you don't have to re-compress the same audio if you need to re-run a transcription later.
 
 <img width="917" height="349" alt="Download compressed audio file" src="https://github.com/user-attachments/assets/055dec51-1c0d-41f8-b183-ffa186298a95" />
 
----
-
-## 2. Transcription
+### 4. Transcription
 
 The compressed audio is sent through an n8n workflow, where an AI model transcribes it into written text — ready to review before minutes are generated.
 
 <img width="1245" height="246" alt="Transcription workflow trigger" src="https://github.com/user-attachments/assets/da776b2c-e90d-43e6-b021-998872618823" />
 <img width="979" height="819" alt="Transcription output" src="https://github.com/user-attachments/assets/8952a6ca-5b91-4829-8cc2-02e215c511b9" />
 
----
-
-## 3. Minutes Generation
+### 5. Minutes Generation
 
 Once you've reviewed and confirmed the transcript, resend it for complete minutes writing.
 
@@ -108,12 +133,6 @@ Find your IP:
 ifconfig | grep "inet " | grep -v 127.0.0.1
 ```
 
-### Configuration
-
-Edit `server/config/settings.json` to configure:
-- Webhook URL
-- Request timeout
-
 ### Systemd Service (Linux)
 
 To run as a service:
@@ -129,3 +148,4 @@ sudo systemctl start minutes-transcriber
 
 - Node.js v18+ installed on the target machine
 - Port 3000 open for network access
+- n8n running with the workflow activated
