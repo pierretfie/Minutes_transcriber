@@ -44,7 +44,7 @@ Once n8n is running and the workflow is active:
 
 > **Important:** You must configure the webhook URL before you can use the app. The UI will show a warning if no webhook is configured.
 
-<img width="947" height="804" alt="image" src="https://github.com/user-attachments/assets/eb914285-ec93-4c8a-9048-0adce1c43a42" />
+<img width="1043" height="818" alt="image" src="https://github.com/user-attachments/assets/1f6b2427-9bb1-4475-a871-807ee8235786" />
 
 ---
 
