@@ -3,4 +3,5 @@ export interface Settings {
   webhookMode: 'test' | 'production';
   requestTimeoutMs: number;
   lastUsedAt: string | null;
+  arnndnModelPath?: string;
 }

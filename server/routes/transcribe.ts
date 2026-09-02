@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { sendToWebhook, sendMeetingDataToWebhook, MeetingData } from '../lib/n8nClient.js';
 import { updateSettings } from '../lib/config.js';
-import { compressAudio, cleanupFile, Bitrate } from '../lib/compress.js';
+import { compressAudio, processAudio, cleanupFile, Bitrate, ProcessingMode } from '../lib/compress.js';
 import { writeFile, unlink } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,9 +24,11 @@ const ALLOWED_MIME_TYPES = [
   'audio/aac',
   'audio/ogg',
   'audio/webm',
+  'audio/opus',
+  'audio/x-opus',
 ];
 
-const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.webm'];
+const ALLOWED_EXTENSIONS = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.webm', '.opus'];
 
 interface PendingRequest {
   id: string;
@@ -52,8 +54,9 @@ router.post('/transcribe', async (req: Request, res: Response) => {
     const { bitrate } = req.body;
     const shouldCompress = bitrate && bitrate !== 'none';
 
-    if (shouldCompress && !['32k', '16k'].includes(bitrate)) {
-      res.status(400).json({ error: 'Invalid bitrate. Must be "none", "32k", or "16k".' });
+    const VALID_MODES = ['32k', '16k', 'denoise', 'compressed-denoised'];
+    if (shouldCompress && !VALID_MODES.includes(bitrate)) {
+      res.status(400).json({ error: `Invalid processing mode. Must be one of: none, ${VALID_MODES.join(', ')}.` });
       return;
     }
 
@@ -98,15 +101,19 @@ router.post('/transcribe', async (req: Request, res: Response) => {
         tempInputPath = join(tmpdir(), `upload-${tempId}${ext}`);
         await writeFile(tempInputPath, file.buffer);
 
-        const result = await compressAudio(tempInputPath, bitrate as Bitrate);
+        const isDenoiseMode = bitrate === 'denoise' || bitrate === 'compressed-denoised';
+        const result = isDenoiseMode
+          ? await processAudio(tempInputPath, bitrate as ProcessingMode)
+          : await compressAudio(tempInputPath, bitrate as Bitrate);
         compressedPath = result.outputPath;
 
         bufferToSend = result.buffer;
-        filenameToSend = file.originalname.replace(/\.[^.]+$/, '.m4a');
-        mimeToSend = 'audio/m4a';
+        const isOpus = result.outputPath.endsWith('.opus');
+        filenameToSend = file.originalname.replace(/\.[^.]+$/, isOpus ? '.opus' : '.m4a');
+        mimeToSend = isOpus ? 'audio/opus' : 'audio/m4a';
 
         const compressedId = randomBytes(16).toString('hex');
-        savedCompressedFilename = `compressed-${compressedId}.m4a`;
+        savedCompressedFilename = `processed-${compressedId}${isOpus ? '.opus' : '.m4a'}`;
         const savedPath = join(COMPRESSED_DIR, savedCompressedFilename);
         await writeFile(savedPath, result.buffer);
 

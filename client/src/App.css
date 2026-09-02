@@ -531,8 +531,20 @@ body {
   cursor: not-allowed;
 }
 
-.compression-selector {
+.processing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
   margin-top: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .processing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.compression-selector {
   padding: 1rem;
   background: #2d2d2d;
   border-radius: 8px;

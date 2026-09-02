@@ -13,6 +13,7 @@ export interface Settings {
   webhookMode: 'test' | 'production';
   requestTimeoutMs: number;
   lastUsedAt: string | null;
+  arnndnModelPath?: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -20,6 +21,7 @@ const DEFAULT_SETTINGS: Settings = {
   webhookMode: 'test',
   requestTimeoutMs: 0,
   lastUsedAt: null,
+  arnndnModelPath: '',
 };
 
 function ensureConfigDir(): void {

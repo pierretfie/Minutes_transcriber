@@ -12,6 +12,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     webhookMode: 'test',
     requestTimeoutMs: 0,
     lastUsedAt: null,
+    arnndnModelPath: '',
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -99,6 +100,18 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               min="0"
             />
             <p className="setting-hint">0 = no timeout (recommended for long recordings)</p>
+          </div>
+
+          <div className="setting-group">
+            <label htmlFor="arnndnModelPath">ARNNDN Model Path</label>
+            <input
+              id="arnndnModelPath"
+              type="text"
+              value={settings.arnndnModelPath || ''}
+              onChange={e => setSettings({ ...settings, arnndnModelPath: e.target.value })}
+              placeholder="/path/to/arnndn-models/std.rnnn"
+            />
+            <p className="setting-hint">Path to std.rnnn for denoising (leave empty for default: arnndn-models/std.rnnn)</p>
           </div>
           
           {settings.lastUsedAt && (

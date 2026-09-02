@@ -8,7 +8,7 @@ export interface TranscriptionError {
 
 export type TranscriptionResponse = TranscriptResult | TranscriptionError;
 
-export type CompressionQuality = 'none' | '32k' | '16k';
+export type CompressionQuality = 'none' | '32k' | '16k' | 'denoise' | 'compressed-denoised';
 
 export type AppMode = 'transcribe' | 'meeting';
 
@@ -16,6 +16,7 @@ export interface MeetingMetadata {
   date: string;
   membersPresent: string;
   absentWithApology: string;
+  additionalInstructions?: string;
 }
 
 export type ProcessingStep = 'uploading' | 'compressing' | 'transcribing' | 'writing-minutes' | 'complete';

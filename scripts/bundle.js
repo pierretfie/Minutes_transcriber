@@ -54,7 +54,18 @@ fs.copyFileSync(
 console.log('5. Copying client build...');
 copyDirSync(path.join(CLIENT_DIR, 'dist'), path.join(BUNDLE_DIR, 'client', 'dist'));
 
-console.log('6. Creating startup script...');
+console.log('6. Copying arnndn models...');
+const modelsSrc = path.join(ROOT_DIR, 'arnndn-models');
+if (fs.existsSync(modelsSrc)) {
+  copyDirSync(modelsSrc, path.join(BUNDLE_DIR, 'arnndn-models'));
+  console.log('   arnndn models copied');
+}
+
+console.log('7. Cleaning source maps and type definitions...');
+cleanDir(path.join(BUNDLE_DIR, 'server', 'dist'));
+console.log('   Removed .d.ts, .d.ts.map, .js.map files');
+
+console.log('8. Creating startup script...');
 const startScript = `#!/bin/bash
 cd "$(dirname "$0")/server"
 node dist/index.js
@@ -67,7 +78,7 @@ node dist/index.js
 `;
 fs.writeFileSync(path.join(BUNDLE_DIR, 'start.bat'), startBat);
 
-console.log('7. Creating README...');
+console.log('8. Creating README...');
 const readme = `# Minutes Transcriber
 
 ## Quick Start
@@ -100,6 +111,14 @@ Edit \`server/config/settings.json\` to configure:
 - Webhook URL
 - Request timeout
 
+## Environment Variables
+
+The \`.env\` file in the server directory contains:
+- \`MPESA_API_KEY\` - M-Pesa API key
+- \`DRAGON_API_URL\` - Dragon middleware URL
+- \`LICENSE_COST\` - License cost (default: 100)
+- \`LICENSE_DURATION_HOURS\` - License duration (default: 24)
+
 ## Notes
 
 - The app serves the UI on port 3000
@@ -130,6 +149,25 @@ function copyDirSync(src, dest) {
       copyDirSync(srcPath, destPath);
     } else {
       fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+function cleanDir(dir) {
+  if (!fs.existsSync(dir)) return;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      cleanDir(fullPath);
+      if (fs.readdirSync(fullPath).length === 0) {
+        fs.rmdirSync(fullPath);
+      }
+    } else if (/\.(d\.ts|d\.ts\.map|js\.map)$/.test(entry.name)) {
+      fs.unlinkSync(fullPath);
     }
   }
 }
