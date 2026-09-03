@@ -3,10 +3,11 @@ import cors from 'cors';
 import multer from 'multer';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import settingsRouter from './routes/settings.js';
 import transcribeRouter from './routes/transcribe.js';
 import filesRouter from './routes/files.js';
+import licenseRouter from './routes/license.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,6 +28,11 @@ const upload = multer({
 const clientDistPath = join(__dirname, '..', '..', 'client', 'dist');
 const bundleClientPath = join(__dirname, '..', 'client', 'dist');
 
+// Ensure compressed dirs exist for both dev (server/compressed) and bundle (server/dist/compressed)
+for (const dir of [join(__dirname, '..', 'compressed'), join(__dirname, 'compressed')]) {
+  try { mkdirSync(dir, { recursive: true }); } catch {}
+}
+
 let staticPath = clientDistPath;
 if (existsSync(bundleClientPath)) {
   staticPath = bundleClientPath;
@@ -39,6 +45,7 @@ app.use(express.static(staticPath));
 app.use('/api', settingsRouter);
 app.use('/api', filesRouter);
 app.use('/api', upload.single('file'), transcribeRouter);
+app.use('/api', licenseRouter);
 
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {

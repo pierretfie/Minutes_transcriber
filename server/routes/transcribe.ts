@@ -2,11 +2,12 @@ import { Router, Request, Response } from 'express';
 import { sendToWebhook, sendMeetingDataToWebhook, MeetingData } from '../lib/n8nClient.js';
 import { updateSettings } from '../lib/config.js';
 import { compressAudio, processAudio, cleanupFile, Bitrate, ProcessingMode } from '../lib/compress.js';
-import { writeFile, unlink } from 'node:fs/promises';
+import { writeFile, unlink, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { randomBytes } from 'node:crypto';
+import { existsSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,6 +15,12 @@ const __dirname = dirname(__filename);
 const router = Router();
 
 const COMPRESSED_DIR = join(__dirname, '..', 'compressed');
+
+async function ensureCompressedDir() {
+  if (!existsSync(COMPRESSED_DIR)) {
+    await mkdir(COMPRESSED_DIR, { recursive: true });
+  }
+}
 
 const ALLOWED_MIME_TYPES = [
   'audio/mpeg',
@@ -115,6 +122,7 @@ router.post('/transcribe', async (req: Request, res: Response) => {
         const compressedId = randomBytes(16).toString('hex');
         savedCompressedFilename = `processed-${compressedId}${isOpus ? '.opus' : '.m4a'}`;
         const savedPath = join(COMPRESSED_DIR, savedCompressedFilename);
+        await ensureCompressedDir();
         await writeFile(savedPath, result.buffer);
 
         pendingRequest.status = 'transcribing';
